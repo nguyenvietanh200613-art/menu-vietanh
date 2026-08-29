@@ -1,0 +1,36 @@
+name: Build iOS Dylib
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup macOS & Xcode
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: '15.0'
+
+    - name: Compile Source to Dylib
+      run: |
+        echo "=== ĐANG BIÊN DỊCH MENU ONYX ==="
+        clang++ -dynamiclib -arch arm64 \
+        -isysroot $(xcrun --sdk iphoneos --show-sdk-path) \
+        -miphoneos-version-min=12.0 \
+        main.mm \
+        -framework UIKit \
+        -framework Foundation \
+        -o MenuOnyx.dylib
+
+    - name: Upload Compiled Dylib
+      uses: actions/upload-artifact@v4
+      with:
+        name: MenuOnyx-Dylib
+        path: MenuOnyx.dylib
